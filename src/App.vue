@@ -1,22 +1,20 @@
 <template>
   <div id="app">
     <header>
-      <h1>Super Chat</h1>
+      <h1>Millenials Chat</h1>
     </header>
 
     <section>
       <div id="change_username">
         <input id="username" v-model="usrname" type="text" />
-        <button id="send_username" type="button" v-on:click="setUsername">Change username</button>
+        <button id="send_username" type="button" v-on:click="setUsername">Set username</button>
       </div>
     </section>
 
-    <section id="chatroom">
-      
-    </section>
+    <section id="chatroom"></section>
 
     <section id="input_zone">
-      <input id="message" v-model="msg" class="vertical-align" type="text"/>
+      <input id="message" v-model="msg" class="vertical-align" type="text" />
       <button id="send_message" class="vertical-align" v-on:click="sendMessage" type="button">Send</button>
     </section>
   </div>
@@ -29,32 +27,28 @@ export default {
   data() {
     return {
       localstore: {},
-      message: {msg:'', usrname:''},
-      msg: '',
-      usrname:'',
-      messages:[]
+      message: { msg: "", usrname: "", date: new Date() },
+      msg: "",
+      usrname: "",
+      messages: []
     };
   },
 
   methods: {
     setUsername() {
       this.message.usrname = this.usrname;
-      this.usrname = "";
     },
-    sendMessage () {
+    sendMessage() {
       this.message.msg = this.msg;
       this.postMessage();
       this.msg = "";
     },
     postMessage: function() {
+      this.message.date = new Date();
       this.localstore
-        .post({
-          username: this.message.usrname,
-          message: this.message.msg,
-          time: new Date()
-        })
-        .then(response => {
-          console.log("Message posted")
+        .post(this.message).then(response => {
+          console.log("Message posted");
+          this.loadMessages();
         })
         .catch(err => {
           console.log("Message not posted", err);
@@ -67,22 +61,21 @@ export default {
           attachments: true
         })
         .then(result => {
-          console.log("RESULTS ARE :", result)
+          console.log("RESULTS ARE :", result);
+          this.messages = result.rows;
+          console.log("MESSAGES : ", this.messages);
         })
         .catch(err => {
           console.log(err);
         });
-    },
-
+    }
   },
 
-  computed: {
-
-  },
+  computed: {},
 
   mounted() {
     this.localstore = new PouchDB("localstore");
-
+    this.loadMessages();
   }
 };
 </script>
@@ -145,10 +138,9 @@ section#chatroom {
   border: 5px inset #8258fa;
   position: absolute;
   margin: auto;
-  height: 85%;
+  height: 79%;
   width: 100%;
   overflow: auto;
-  bottom: 0px;
 }
 
 section#input_zone {
